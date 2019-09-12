@@ -51,6 +51,11 @@ h2 {
   font-size: 1.5em;
 }
 
+h3 {
+  font-size: 1.25em;
+  margin-bottom: 10px;
+}
+
 main {
   padding: 3em;
 }
@@ -77,4 +82,8 @@ li {
 
 .inline-list {
   display: inline-block;
+}
+
+.form-container {
+  margin: 30px;
 }
