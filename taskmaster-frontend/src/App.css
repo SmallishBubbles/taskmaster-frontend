@@ -31,3 +31,50 @@
     transform: rotate(360deg);
   }
 }
+
+nav {
+  height: 3em;
+  text-align: center;
+  background-color: #401d57;
+  color: lightgray;
+  padding: 0.5em;
+  padding-top: 1em;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+main {
+  padding: 3em;
+}
+
+li {
+  margin: 5px;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.summary-container {
+  margin-top: 30px;
+  margin-left: 30px;
+  font-size: 1.25em;
+}
+
+.details {
+  margin-top: 10px;
+  margin-left: 50px;
+}
+
+.inline-list {
+  display: inline-block;
+}
