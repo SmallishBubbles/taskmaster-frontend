@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { useInput } from './useInput.js';
 import './reset.css';
 import './App.css';
 
@@ -39,6 +40,10 @@ function App() {
             )
           })}
         </ul>
+        <div className="form-container">
+          <h3> Create a new task: </h3>
+          <TaskForm></TaskForm>
+        </div>
       </main>
     </div>
   );
@@ -57,6 +62,50 @@ function History(props) {
       })}
     </ol>
   )
+}
+
+// https://rangle.io/blog/simplifying-controlled-inputs-with-hooks/
+function TaskForm(props) {
+  const { value:title, bind:bindTitle, reset:resetTitle } = useInput('');
+  const { value:description, bind:bindDescription, reset:resetDescription } = useInput('');
+  
+  const handleSubmit = (event) => {
+      event.preventDefault();
+      let newTask = {
+        title: title,
+        description: description
+      }
+      console.log(newTask);
+
+      fetch(API + "/tasks", {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(newTask)
+      })
+        .then( data => data.json() )
+        .then( fetchedTasks => console.log(fetchedTasks) );
+
+      resetTitle();
+      resetDescription();
+
+
+      // I know this is very bad react. Need to figure out how to change state of app instead.
+      window.location.reload(false);
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Title:
+        <input type="text" {...bindTitle} />
+      </label>
+      <label>
+        Description:
+        <input type="text" {...bindDescription} />
+      </label>
+      <input type="submit" value="Submit" />
+    </form>
+  );
 }
 
 export default App;
