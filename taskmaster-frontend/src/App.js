@@ -3,6 +3,8 @@ import { useInput } from './useInput.js';
 import './reset.css';
 import './App.css';
 
+let form = new FormData();
+
 const API = "http://taskmaster-backend.us-west-2.elasticbeanstalk.com/api/v1"
 
 function App() {
@@ -10,6 +12,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
 
   function _getTasks() {
+    console.log("get tasks")
     fetch(API + "/tasks")
       .then( data => data.json() )
       .then( fetchedTasks => setTasks(fetchedTasks) );
@@ -27,22 +30,26 @@ function App() {
           {tasks.map( (task,idx) => {
             return (
               <li key={task.id}>
-                <details>
-                  <summary className="flex summary-container">
-                    <div className="summary">
-                      <h2>{task.title}</h2>
-                      <p>{task.description}</p>
-                    </div>
-                  </summary>
-                  <History history={task.history} />
-                </details>
+                <div className="task">
+                  <img src={task.imgUrl}></img>
+                  <details>
+                    <summary className="flex summary-container">
+                      <div className="summary">
+                        <h2>{task.title}</h2>
+                        <p>{task.description}</p>
+                        <AddPic id={task.id} reload={_getTasks}></AddPic>
+                      </div>
+                    </summary>
+                    <History history={task.history} />
+                  </details>
+                </div>
               </li>
             )
           })}
         </ul>
         <div className="form-container">
           <h3> Create a new task: </h3>
-          <TaskForm></TaskForm>
+          <TaskForm reload={_getTasks}></TaskForm>
         </div>
       </main>
     </div>
@@ -66,6 +73,7 @@ function History(props) {
 
 // https://rangle.io/blog/simplifying-controlled-inputs-with-hooks/
 function TaskForm(props) {
+
   const { value:title, bind:bindTitle, reset:resetTitle } = useInput('');
   const { value:description, bind:bindDescription, reset:resetDescription } = useInput('');
   
@@ -83,6 +91,7 @@ function TaskForm(props) {
         body: JSON.stringify(newTask)
       })
         .then( data => data.json() )
+        .then( () => props.reload() )
         .then( fetchedTasks => console.log(fetchedTasks) );
 
       resetTitle();
@@ -90,7 +99,7 @@ function TaskForm(props) {
 
 
       // I know this is very bad react. Need to figure out how to change state of app instead.
-      window.location.reload(false);
+      // window.location.reload(false);
   }
   
   return (
@@ -104,6 +113,37 @@ function TaskForm(props) {
         <input type="text" {...bindDescription} />
       </label>
       <input type="submit" value="Submit" />
+    </form>
+  );
+}
+
+
+function AddPic(props) {
+  function _handleChange(event) {
+    let value = event.target.files ? event.target.files[0] : event.target.value;
+    form.set(event.target.name, value);
+  }
+
+  function _upload(event) {
+    event.preventDefault();
+    fetch(API + `/tasks/${props.id}/images` , {
+      method: "POST",
+      mode: "no-cors",
+      body: form,
+    })
+    .then(response => response.json())
+    .catch(error => console.error('Error:', error))
+    .then( () => props.reload() );
+
+  }
+
+  return (
+    <form onSubmit={_upload} action={API + `/tasks/${props.id}/images`} method="POST" encType={"multipart/form-data"}>
+      <label>
+        <span>Upload Image </span>
+        <input onChange={_handleChange} name="file" type="file" />
+      </label>
+      <button>Save</button>
     </form>
   );
 }
