@@ -17,3 +17,7 @@ This application allows a user to view tasks and their history.
   Our lambda function is automatically invoked when a new image is uploaded to the images s3 bucket. 
 
   Our main issue with this function was the `runtime` environment. Our function was automatically created with node 10, but the function needs `Node.js 8.10` to work correctly.
+  
+  
+### Collaborators
+- Peter Lee
