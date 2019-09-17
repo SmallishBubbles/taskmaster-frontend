@@ -18,6 +18,17 @@ function App() {
       .then( fetchedTasks => setTasks(fetchedTasks) );
   }
 
+  function _getThumbnailUrl(url) {
+    if ( url !== null ) {
+      let originalUrl = url;
+      let imageName = originalUrl.match(/[^/]+$/);
+      let newImageName = "resized-" + imageName;
+      let newUrl = "https://taskmaster-frontend-marisha-images-resized.s3-us-west-2.amazonaws.com/" + newImageName;
+      return newUrl;
+    }
+    return null;
+  }
+
   useEffect( _getTasks, [] );
 
   return (
@@ -32,6 +43,7 @@ function App() {
               <li key={task.id}>
                 <div className="task">
                   <img src={task.imgUrl}></img>
+                  <img src={_getThumbnailUrl(task.imgUrl)}></img>
                   <details>
                     <summary className="flex summary-container">
                       <div className="summary">
