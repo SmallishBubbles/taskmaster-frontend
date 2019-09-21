@@ -5,7 +5,8 @@ import './App.css';
 
 let form = new FormData();
 
-const API = "http://taskmaster-backend.us-west-2.elasticbeanstalk.com/api/v1"
+// const API = "http://taskmaster-backend.us-west-2.elasticbeanstalk.com/api/v1"
+const API = "https://vv7fgjnxgi.execute-api.us-west-2.amazonaws.com/dev"
 
 function App() {
 
@@ -13,13 +14,13 @@ function App() {
 
   function _getTasks() {
     console.log("get tasks")
-    fetch(API + "/tasks")
+    fetch(`${API}/tasks`)
       .then( data => data.json() )
       .then( fetchedTasks => setTasks(fetchedTasks) );
   }
 
   function _getThumbnailUrl(url) {
-    if ( url !== null ) {
+    if ( url !== "null" && url !== null ) {
       let originalUrl = url;
       let imageName = originalUrl.match(/[^/]+$/);
       let newImageName = "resized-" + imageName;
@@ -42,14 +43,18 @@ function App() {
             return (
               <li key={task.id}>
                 <div className="task">
-                  <img src={task.imgUrl}></img>
-                  <img src={_getThumbnailUrl(task.imgUrl)}></img>
+                  {/* <img src={task.imgUrl}></img> */}
+                  {/* <img src={_getThumbnailUrl(task.imgUrl)}></img> */}
                   <details>
                     <summary className="flex summary-container">
                       <div className="summary">
                         <h2>{task.title}</h2>
                         <p>{task.description}</p>
-                        <AddPic id={task.id} reload={_getTasks}></AddPic>
+                        <p>Assigned to: {task.assignee}</p>
+                        <br/>
+                        {/* <AddPic id={task.id} reload={_getTasks}></AddPic> */}
+                        <AssigneeForm id={task.id} reload={_getTasks}></AssigneeForm>
+                        <StatusForm id={task.id} reload={_getTasks}></StatusForm>
                       </div>
                     </summary>
                     <History history={task.history} />
@@ -108,10 +113,6 @@ function TaskForm(props) {
 
       resetTitle();
       resetDescription();
-
-
-      // I know this is very bad react. Need to figure out how to change state of app instead.
-      // window.location.reload(false);
   }
   
   return (
@@ -125,6 +126,77 @@ function TaskForm(props) {
         <input type="text" {...bindDescription} />
       </label>
       <input type="submit" value="Submit" />
+    </form>
+  );
+}
+
+// https://rangle.io/blog/simplifying-controlled-inputs-with-hooks/
+function StatusForm(props) {
+
+  const { value:status, bind:bindStatus, reset:resetStatus } = useInput('');
+  
+  const handleSubmit = (event) => {
+      event.preventDefault();
+      
+      fetch(API + `/tasks/${props.id}/status/${status}`, {
+        method: "PUT",
+        headers: {'Content-Type':'application/json'},
+      })
+        .then( data => data.json() )
+        .then( () => props.reload() )
+
+      resetStatus();
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Update Status:
+        <select {...bindStatus}>
+          <option value="" selected disabled hidden>New Status</option>
+          <option value="Available">Available</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Finished">Finished</option>
+        </select>
+      </label>
+      <input type="submit" value="Submit" />
+    </form>
+  );
+}
+
+// https://rangle.io/blog/simplifying-controlled-inputs-with-hooks/
+function AssigneeForm(props) {
+
+  const { value:assignee, bind:bindAssignee, reset:resetAssignee } = useInput('');
+  
+  const handleSubmit = (event) => {
+      event.preventDefault();
+      
+      fetch(API + `/tasks/${props.id}/assign/${assignee}`, {
+        method: "PUT",
+        headers: {'Content-Type':'application/json'},
+      })
+        .then( data => data.json() )
+        .then( () => props.reload() )
+
+      fetch(API + `/tasks/${props.id}/status/Assigned`, {
+        method: "PUT",
+        headers: {'Content-Type':'application/json'},
+      })
+        .then( data => data.json() )
+        .then( () => props.reload() )
+
+      resetAssignee();
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        New Assignee:
+        <input type="text" {...bindAssignee}/>
+      </label>
+      <input type="submit" value="Submit"/>
     </form>
   );
 }
