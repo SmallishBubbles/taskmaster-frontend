@@ -51,6 +51,7 @@ function App() {
                         <h2>{task.title}</h2>
                         <p>{task.description}</p>
                         <p>Assigned to: {task.assignee}</p>
+                        <p>Status: {task.status}</p>
                         <br/>
                         {/* <AddPic id={task.id} reload={_getTasks}></AddPic> */}
                         <AssigneeForm id={task.id} reload={_getTasks}></AssigneeForm>
@@ -67,6 +68,8 @@ function App() {
         <div className="form-container">
           <h3> Create a new task: </h3>
           <TaskForm reload={_getTasks}></TaskForm>
+          <br></br>
+          <SubscriberForm reload={_getTasks}></SubscriberForm>
         </div>
       </main>
     </div>
@@ -195,6 +198,36 @@ function AssigneeForm(props) {
       <label>
         New Assignee:
         <input type="text" {...bindAssignee}/>
+      </label>
+      <input type="submit" value="Submit"/>
+    </form>
+  );
+}
+
+// https://rangle.io/blog/simplifying-controlled-inputs-with-hooks/
+function SubscriberForm(props) {
+
+  const { value:phoneNumber, bind:bindPhoneNumber, reset:resetPhoneNumber } = useInput('');
+  
+  const handleSubmit = (event) => {
+      event.preventDefault();
+      
+      fetch(API + `/subscribe`, {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({number: phoneNumber})
+      })
+        .then( data => data.json() )
+        .then( () => props.reload() )
+
+      resetPhoneNumber();
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Enter your phone number to get notified when tasks are completed:
+        <input placeholder="+18001112222" type="text" {...bindPhoneNumber}/>
       </label>
       <input type="submit" value="Submit"/>
     </form>
